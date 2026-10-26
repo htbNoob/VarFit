@@ -1,0 +1,80 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="1.0.${GITHUB_RUN_NUMBER}"; fi
+          echo "VERSION_NAME=$V" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Use private signing key (optional)
+        env:
+          KS_B64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          KS_KEYPASS: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+            echo "SIGNING_STORE_PASSWORD=$KS_PASS" >> "$GITHUB_ENV"
+            echo "SIGNING_KEY_ALIAS=$KS_ALIAS" >> "$GITHUB_ENV"
+            echo "SIGNING_KEY_PASSWORD=${KS_KEYPASS:-$KS_PASS}" >> "$GITHUB_ENV"
+            echo "Signing with the private key from repository secrets."
+          else
+            echo "Signing with the public key in signing/ (see README)."
+          fi
+
+      - name: Unit tests and APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+
+      - name: Collect APK
+        run: cp app/build/outputs/apk/release/app-release.apk "VarFit-${VERSION_NAME}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VarFit-${{ env.VERSION_NAME }}
+          path: VarFit-*.apk
+
+      - name: Update the "latest" pre-release (pushes to main)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest "VarFit-${VERSION_NAME}.apk" \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Latest build (${VERSION_NAME})" \
+            --notes "Automatic build of ${GITHUB_SHA::7}. Installs as an update over earlier VarFit builds (same signing key)."
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: VarFit-*.apk
+          generate_release_notes: true

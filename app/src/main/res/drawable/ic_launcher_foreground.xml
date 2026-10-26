@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A light curve: measured points (white) with a fitted model (orange). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF9E57"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M25,45 C37,45 40,45 46,57 C50,66 58,66 62,57 C68,45 71,45 83,45" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25.8,48a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M31.8,42.5a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M37.8,46.5a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M42.8,53a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M47.3,61.5a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M52.8,66a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M58.3,60a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M62.8,51.5a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M68.8,43a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M74.8,47a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0
+                          M79.8,43.5a2.2,2.2 0,1 0,4.4 0a2.2,2.2 0,1 0,-4.4 0" />
+</vector>
